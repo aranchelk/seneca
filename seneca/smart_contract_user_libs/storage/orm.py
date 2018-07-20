@@ -24,25 +24,32 @@ name_space = None
 
 str_len = db.str_len
 
+
+class ORM(object):
+    def __init__(self, table):
+        self.table = table
+
+
 def add_name_space(t_name):
     assert name_space is not None, "Tabular module namespace has not been set!"
     return name_space + '$' + t_name
 
+
 def new(table_name: str, columns):
     # assert that there is a primary key / unique in the first column
     assert len(columns) > 0
-    # assert columns[0]
+    assert columns[0][-1] is True
 
     # build the query
-
-
-
-    t = db.Table(add_name_space(name), db.AutoIncrementColumn('id'),
+    t = db.Table(add_name_space(table_name), db.AutoIncrementColumn('id'),
                  [db.Column(*x) for x in columns]
                  )
-    t.create_table(if_not_exists=True).run(ex)
 
-    pass
+    t.create_table(if_not_exists=True).run(ex)
+    return ORM(t)
+
 
 def get(table_name: str):
-    pass
+    assert ex is not None
+    t = db.Table.from_existing(add_name_space(table_name)).run(ex)
+    return ORM(t)
